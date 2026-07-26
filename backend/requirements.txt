@@ -1,0 +1,36 @@
+# ─── Core ────────────────────────────────────────────────────────
+fastapi
+uvicorn[standard]
+python-dotenv
+pydantic
+pydantic-settings
+
+# ─── Database ────────────────────────────────────────────────────
+sqlalchemy[asyncio]
+asyncpg
+psycopg[binary]
+alembic
+geoalchemy2
+
+# ─── Authentication ──────────────────────────────────────────────
+python-jose[cryptography]
+passlib[bcrypt]
+bcrypt
+
+# ─── AI / LLM ───────────────────────────────────────────────────
+langchain
+langchain-community
+langchain-core
+httpx
+
+# ─── Data Generation ────────────────────────────────────────────
+faker
+
+# ─── PDF Export ──────────────────────────────────────────────────
+reportlab
+markdown2
+
+# ─── Utilities ───────────────────────────────────────────────────
+sse-starlette
+python-multipart
+sqlparse
