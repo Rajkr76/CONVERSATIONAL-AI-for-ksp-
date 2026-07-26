@@ -77,19 +77,25 @@ export async function streamChatApi(
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split("\n\n");
-    buffer = lines.pop() || "";
+    const events = buffer.split("\n\n");
+    buffer = events.pop() || "";
 
-    for (const line of lines) {
-      if (line.startsWith("data: ")) {
-        try {
-          const jsonStr = line.replace("data: ", "").trim();
-          if (jsonStr) {
-            const parsed = JSON.parse(jsonStr);
-            onChunk(parsed.type, parsed.data);
+    for (const event of events) {
+      // Each SSE event block may contain multiple lines:
+      // event: message\nid: ...\ndata: {...}
+      // We need to extract only the data: line(s)
+      const lines = event.split("\n");
+      for (const line of lines) {
+        if (line.startsWith("data: ")) {
+          try {
+            const jsonStr = line.slice(6).trim();
+            if (jsonStr) {
+              const parsed = JSON.parse(jsonStr);
+              onChunk(parsed.type, parsed.data);
+            }
+          } catch (e) {
+            console.error("Failed to parse SSE payload", e);
           }
-        } catch (e) {
-          console.error("Failed to parse SSE payload", e);
         }
       }
     }

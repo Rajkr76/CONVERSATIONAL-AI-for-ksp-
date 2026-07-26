@@ -196,10 +196,10 @@ class LangChainPipeline:
                 "conversation_id": conversation_id,
             })
 
-    def _sse_event(self, event_type: str, data: dict) -> str:
-        """Format as SSE event string."""
+    def _sse_event(self, event_type: str, data: dict) -> dict:
+        """Format as SSE event dict for EventSourceResponse."""
         chunk = StreamChunk(type=event_type, data=data)
-        return f"data: {chunk.model_dump_json()}\n\n"
+        return {"data": chunk.model_dump_json()}
 
     def _extract_evidence_refs(self, result: SQLResult, max_refs: int = 5) -> list[str]:
         """Extract evidence references from result rows."""

@@ -19,15 +19,18 @@ export default function DashboardPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
+  const [isMounted, setIsMounted] = useState(false);
+
   useEffect(() => {
+    setIsMounted(true);
     initialize();
   }, [initialize]);
 
   useEffect(() => {
-    if (!isAuthenticated) {
+    if (isMounted && !isAuthenticated) {
       router.push("/login");
     }
-  }, [isAuthenticated, router]);
+  }, [isMounted, isAuthenticated, router]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -40,7 +43,7 @@ export default function DashboardPage() {
     "Which police station has the highest crime rate?",
   ];
 
-  if (!isAuthenticated) return null;
+  if (!isMounted || !isAuthenticated) return null;
 
   return (
     <div className="flex h-screen bg-slate-950 text-slate-100 overflow-hidden">
