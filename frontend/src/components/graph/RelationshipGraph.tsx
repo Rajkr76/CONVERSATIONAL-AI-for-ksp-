@@ -32,10 +32,10 @@ function CustomNode({ data }: { data: any }) {
 
   return (
     <div
-      className="px-3 py-2 rounded-xl border border-slate-700 shadow-lg backdrop-blur-md text-slate-100 flex items-center gap-2 min-w-[120px]"
+      className="px-3 py-2 rounded-xl border border-slate-700 shadow-lg backdrop-blur-md text-slate-100 flex items-center gap-2 min-w-30"
       style={{ backgroundColor: `${data.color}25`, borderColor: data.color }}
     >
-      <Handle type="target" position={Position.Top} className="w-2 h-2 !bg-indigo-400" />
+      <Handle type="target" position={Position.Top} className="w-2 h-2 bg-indigo-400!" />
       <div
         className="p-1.5 rounded-lg flex items-center justify-center text-white"
         style={{ backgroundColor: data.color }}
@@ -46,9 +46,9 @@ function CustomNode({ data }: { data: any }) {
         <div className="text-[10px] uppercase font-bold tracking-wider text-slate-400">
           {data.type}
         </div>
-        <div className="text-xs font-semibold truncate max-w-[130px]">{data.label}</div>
+        <div className="text-xs font-semibold truncate max-w-32.5">{data.label}</div>
       </div>
-      <Handle type="source" position={Position.Bottom} className="w-2 h-2 !bg-indigo-400" />
+      <Handle type="source" position={Position.Bottom} className="w-2 h-2 bg-indigo-400!" />
     </div>
   );
 }

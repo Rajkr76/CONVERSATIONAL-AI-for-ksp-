@@ -28,7 +28,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     >
       {/* AI Avatar */}
       {!isUser && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md">
+        <div className="shrink-0 w-8 h-8 rounded-full bg-indigo-600/20 border border-indigo-500/40 flex items-center justify-center text-indigo-400 shadow-md">
           <Bot className="w-4 h-4" />
         </div>
       )}
@@ -110,7 +110,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
       {/* User Avatar */}
       {isUser && (
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shadow-md">
+        <div className="shrink-0 w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 shadow-md">
           <User className="w-4 h-4" />
         </div>
       )}

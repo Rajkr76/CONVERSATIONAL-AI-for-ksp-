@@ -19,6 +19,21 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      // Token expired or invalid
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("ksp_auth_token");
+        localStorage.removeItem("ksp_auth_user");
+        window.location.href = "/login";
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export async function loginApi(username: string, password: string) {
   const response = await api.post("/auth/login", { username, password });
   return response.data;
@@ -61,6 +76,14 @@ export async function streamChatApi(
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("ksp_auth_token");
+        localStorage.removeItem("ksp_auth_user");
+        window.location.href = "/login";
+      }
+      return;
+    }
     const errorText = await response.text();
     onError(new Error(errorText || "Stream request failed"));
     return;
@@ -77,14 +100,14 @@ export async function streamChatApi(
     if (done) break;
 
     buffer += decoder.decode(value, { stream: true });
-    const events = buffer.split("\n\n");
+    // sse-starlette sends \r\n\r\n, some other servers send \n\n
+    const events = buffer.split(/\r?\n\r?\n/);
     buffer = events.pop() || "";
 
     for (const event of events) {
-      // Each SSE event block may contain multiple lines:
-      // event: message\nid: ...\ndata: {...}
-      // We need to extract only the data: line(s)
-      const lines = event.split("\n");
+      if (!event.trim()) continue;
+      
+      const lines = event.split(/\r?\n/);
       for (const line of lines) {
         if (line.startsWith("data: ")) {
           try {

@@ -50,13 +50,21 @@ class LLMService:
                 "options": {"temperature": 0.1, "top_p": 0.9, "num_predict": 1024},
             }
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(url, json=payload, headers=headers)
-            response.raise_for_status()
-            data = response.json()
-            if self._is_openai_format():
-                return data["choices"][0]["message"]["content"]
-            return data.get("response", "")
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                response = await client.post(url, json=payload, headers=headers)
+                response.raise_for_status()
+                data = response.json()
+                if self._is_openai_format():
+                    return data["choices"][0]["message"]["content"]
+                return data.get("response", "")
+        except httpx.HTTPStatusError as e:
+            print(f"\n[LLM_SERVICE ERROR] HTTP {e.response.status_code}")
+            print(f"[LLM_SERVICE ERROR] Response Body: {e.response.text}\n")
+            raise
+        except Exception as e:
+            print(f"\n[LLM_SERVICE ERROR] Unexpected error: {str(e)}\n")
+            raise
 
     async def generate_stream(
         self, prompt: str, model: str | None = None, system: str = ""
@@ -87,35 +95,45 @@ class LLMService:
                 "options": {"temperature": 0.1, "top_p": 0.9, "num_predict": 1024},
             }
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            async with client.stream("POST", url, json=payload, headers=headers) as response:
-                response.raise_for_status()
-                async for line in response.aiter_lines():
-                    line = line.strip()
-                    if not line:
-                        continue
-                        
-                    if self._is_openai_format():
-                        if line == "data: [DONE]":
-                            break
-                        if line.startswith("data: "):
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                async with client.stream("POST", url, json=payload, headers=headers) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        line = line.strip()
+                        if not line:
+                            continue
+                            
+                        if self._is_openai_format():
+                            if line == "data: [DONE]":
+                                break
+                            if line.startswith("data: "):
+                                try:
+                                    data = json.loads(line[6:])
+                                    token = data["choices"][0]["delta"].get("content", "")
+                                    if token:
+                                        yield token
+                                except (json.JSONDecodeError, KeyError, IndexError):
+                                    continue
+                        else:
                             try:
-                                data = json.loads(line[6:])
-                                token = data["choices"][0]["delta"].get("content", "")
+                                data = json.loads(line)
+                                token = data.get("response", "")
                                 if token:
                                     yield token
-                            except (json.JSONDecodeError, KeyError, IndexError):
+                                if data.get("done", False):
+                                    break
+                            except json.JSONDecodeError:
                                 continue
-                    else:
-                        try:
-                            data = json.loads(line)
-                            token = data.get("response", "")
-                            if token:
-                                yield token
-                            if data.get("done", False):
-                                break
-                        except json.JSONDecodeError:
-                            continue
+        except httpx.HTTPStatusError as e:
+            print(f"\n[LLM_SERVICE STREAM ERROR] HTTP {e.response.status_code}")
+            # Stream response content might need to be read
+            body = await e.response.aread() if hasattr(e.response, "aread") else "Could not read body"
+            print(f"[LLM_SERVICE STREAM ERROR] Response Body: {body}\n")
+            raise
+        except Exception as e:
+            print(f"\n[LLM_SERVICE STREAM ERROR] Unexpected error: {str(e)}\n")
+            raise
 
     async def generate_sql(self, prompt: str) -> str:
         """Generate SQL using SQLCoder model."""

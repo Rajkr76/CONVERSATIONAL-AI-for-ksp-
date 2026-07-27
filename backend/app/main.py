@@ -16,11 +16,11 @@ async def lifespan(app: FastAPI):
     # Startup: create tables if they don't exist
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
-    print(f"🚀 {settings.APP_NAME} v{settings.APP_VERSION} started")
+    print(f"[{settings.APP_NAME}] v{settings.APP_VERSION} started")
     yield
     # Shutdown
     await async_engine.dispose()
-    print("👋 Application shutdown complete")
+    print("[Application] Shutdown complete")
 
 
 app = FastAPI(

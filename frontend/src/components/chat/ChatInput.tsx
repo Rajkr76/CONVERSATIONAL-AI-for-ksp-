@@ -56,7 +56,7 @@ export function ChatInput() {
           }
           rows={1}
           disabled={isStreaming}
-          className="flex-1 bg-transparent text-slate-100 placeholder-slate-500 text-sm p-2 resize-none outline-none max-h-32 min-h-[40px] leading-relaxed"
+          className="flex-1 bg-transparent text-slate-100 placeholder-slate-500 text-sm p-2 resize-none outline-none max-h-32 min-h-10 leading-relaxed"
         />
 
         {/* Action Controls */}
