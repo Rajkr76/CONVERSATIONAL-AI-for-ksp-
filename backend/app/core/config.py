@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     JWT_EXPIRY_MINUTES: int = 480
 
     # ─── CORS ────────────────────────────────────────────────────
-    CORS_ORIGINS: str = "http://localhost:3000"
+    CORS_ORIGINS: str = "https://conversational-ai-by-cybershield.onslate.in"
 
     @property
     def cors_origins_list(self) -> List[str]:
